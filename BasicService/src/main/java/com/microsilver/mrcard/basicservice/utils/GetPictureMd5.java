@@ -23,10 +23,11 @@ import java.security.NoSuchAlgorithmException;
  */
 public class GetPictureMd5 {
 	public static void main(String[] args) {
-		String name = "D:\\aim\\2018\\04\\99bcac41-4d8a-468a-a929-8b525ab9c1f9.png";
-		String name1 = "F:\\Video\\111.png";
-		getPictureMd5(name);
-		getPictureMd5(name1);
+		String name = "C:\\Users\\Administrator\\Desktop\\背面.png";
+		String name1 = "C:\\Users\\Administrator\\Desktop\\aaa.jpg";
+		System.out.println(getPictureMd5(name));
+		System.out.println(getPictureMd5(name1));
+		System.out.println(getPictureMd5(name).equals(getPictureMd5(name1)));
 	}
 	
 	public static String getPictureMd5(String name) {
@@ -51,7 +52,7 @@ public class GetPictureMd5 {
 		                }
 		                str = val + str; 
 		            }
-		            System.out.println("文件md5值：" + bigInt.toString(16));
+		            //System.out.println("文件md5值：" + bigInt.toString(16));
 		        } catch (FileNotFoundException e) {
 		            e.printStackTrace();
 		        } catch (NoSuchAlgorithmException e) {

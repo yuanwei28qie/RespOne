@@ -95,7 +95,7 @@ public class UserController extends BaseController {
 		 //添加到数据库
 		 userService.insertUser(fxSdUserMember);
 		 result.setMessage("用户添加成功");
-		 result.setState(6);
+		 result.setState(200);
 		 return result;
 	}
 	
@@ -165,8 +165,9 @@ public class UserController extends BaseController {
 			 }
 		 }
 		 //添加到数据库
+		 result.setData(fxSdUserMember);
 		 result.setMessage("用户添加成功");
-		 result.setState(4);
+		 result.setState(200);
 	
 		 return result;
 			
@@ -199,6 +200,7 @@ public class UserController extends BaseController {
 							System.out.println(selectUserByMobile.toString());
 							result.setData(selectUserByMobile);
 							result.setMessage("Ok");
+							result.setState(200);
 						}
 					}
 					//type类型是1则是修改密码,此刻的coke是验证码
@@ -209,6 +211,7 @@ public class UserController extends BaseController {
 							userService.updatePwd(selectUserByMobile,mobile);
 							result.setData(selectUserByMobile);
 							result.setMessage("Ok");
+							result.setState(200);
 						}
 					}
 				}
@@ -254,7 +257,7 @@ public class UserController extends BaseController {
 			result.setMessage("验证码有误,请重新输入");
 			return result;
 		}
-		result.setState(4);
+		result.setState(200);
 		result.setMessage("恭喜你,登陆成功");
 		return result;
 	}
@@ -290,7 +293,7 @@ public class UserController extends BaseController {
 			result.setMessage("您输入的密码有误,请重新输出");
 			return result;
 		}
-		result.setState(5);
+		result.setState(200);
 		result.setMessage("恭喜你,登陆成功");
 
 		return result;
@@ -309,6 +312,7 @@ public class UserController extends BaseController {
 				if(selectUserByMobile!=null) {
 					result.setData(selectUserByMobile);
 					result.setMessage("Ok");
+					result.setData(200);
 				}
 			}
 		}catch(Exception e) {
@@ -348,6 +352,7 @@ public class UserController extends BaseController {
 								userService.updatePhone(selectUserByMobile,oldPhoneNumber);
 								result.setData(selectUserByMobile);
 								result.setMessage("Ok");
+								result.setState(200);
 							}
 						}
 					}
@@ -417,6 +422,7 @@ public class UserController extends BaseController {
 					userService.insertAddress(fxSdUserAddress);
 					result.setData(fxSdUserAddress);
 					result.setMessage("Ok");
+					result.setState(200);
 				}
 			}
 		}catch(Exception e) {
@@ -479,6 +485,7 @@ public class UserController extends BaseController {
 				userService.updateAddress(fxSdUserAddress,addressId);
 				result.setData(fxSdUserAddress);
 				result.setMessage("Ok");
+				result.setState(200);
 				
 			}
 		}catch(Exception e) {
@@ -518,6 +525,7 @@ public class UserController extends BaseController {
 				fxSdUserAddress.setIsdefault((byte)1);
 				userService.updateAddress(fxSdUserAddress, String.valueOf(fxSdUserAddress.getId()));
 				result.setMessage("OK");
+				result.setState(200);
 			}
 		}catch(Exception e) {
 			logger.error("deleteUserAdress error:{}",e.getMessage());
@@ -553,6 +561,7 @@ public class UserController extends BaseController {
 				fxSdUserAddress.setIsdefault((byte) 1);
 				userService.updateAddress(fxSdUserAddress, addressId);
 				result.setMessage("ok");
+				result.setState(200);
 			}
 		}catch(Exception e) {
 			logger.error("SetUpDefaultAddress error:{}",e.getMessage());
@@ -578,6 +587,7 @@ public class UserController extends BaseController {
 				List<FxSdUserAddress> list = userService.selectUserAllAddress(memberId);
 				result.setData(list);
 				result.setMessage("ok");
+				result.setState(200);
 			}
 		}catch(Exception e) {
 			logger.error("SerachUserAddressList error:{}",e.getMessage());
@@ -607,6 +617,7 @@ public class UserController extends BaseController {
 					userService.updateAvatar(user);
 					result.setData(user);
 					result.setMessage("ok");
+					result.setState(200);
 				}
 			}
 		}catch(Exception e) {
@@ -637,6 +648,7 @@ public class UserController extends BaseController {
 					userService.updateAvatar(user);
 					result.setData(user);
 					result.setMessage("ok");
+					result.setState(200);
 				}
 			}
 		}catch(Exception e) {

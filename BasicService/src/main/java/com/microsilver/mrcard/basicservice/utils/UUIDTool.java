@@ -31,7 +31,7 @@ public class UUIDTool {
                 + str.substring(14, 18) + str.substring(19, 23)  
                 + str.substring(24);  
         return temp;*/  
-          System.out.println(UUID.randomUUID());
+         // System.out.println(UUID.randomUUID());
         return UUID.randomUUID().toString().replace("-", "").substring(0,10);  
     }  
   
