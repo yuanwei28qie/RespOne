@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.microsilver.mrcard.basicservice.dao.FxSdUserAddressMapper;
+import com.microsilver.mrcard.basicservice.dao.FxSdUserDeliverAdditionalMapper;
 import com.microsilver.mrcard.basicservice.dao.FxSdUserMemberMapper;
 import com.microsilver.mrcard.basicservice.dao.FxSdUserPreRegMapper;
 import com.microsilver.mrcard.basicservice.model.FxSdUserAddress;
@@ -31,6 +32,8 @@ public class UserService {
 	private FxSdUserPreRegMapper fxSdUserPreRegMapper;
 	@Autowired
 	private FxSdUserAddressMapper fxSdUserAddressMapper;
+	@Autowired
+	private FxSdUserDeliverAdditionalMapper fxSdUserDeliverAdditionalMapper;
 
 	public FxSdUserMember selectUserByMobile(String mobile) {
 		FxSdUserMemberExample fxSdUserMemberExample = new FxSdUserMemberExample();

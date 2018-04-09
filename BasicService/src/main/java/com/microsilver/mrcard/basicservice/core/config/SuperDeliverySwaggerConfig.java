@@ -31,8 +31,8 @@ public class SuperDeliverySwaggerConfig {
 	        return new Docket(DocumentationType.SWAGGER_2)
 	                .genericModelSubstitutes(DeferredResult.class)
 	                .useDefaultResponseMessages(false)
-	                .forCodeGeneration(false)
-	                .pathMapping("/")
+	                .forCodeGeneration(true)
+	                .pathMapping("")
 	                .select()
 	                .build()
 	                .apiInfo(productApiInfo());

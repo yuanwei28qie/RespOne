@@ -88,4 +88,16 @@ public class SuperDeliveryService {
 		fxSdUserDeliverinfoMapper.updateByExampleSelective(selectDeliveryBymobile, example);
 	}
 
+	
+	public FxSdUserDeliverinfo selectUserBysuperDeliveryId(String superDeliveryId) {
+		return  fxSdUserDeliverinfoMapper.selectByPrimaryKey(Long.parseLong(superDeliveryId));
+		
+	}
+
+	
+	public void updateAvatar(FxSdUserDeliverinfo superDelivery) {
+		fxSdUserDeliverinfoMapper.updateByPrimaryKey(superDelivery);
+		
+	}
+
 }

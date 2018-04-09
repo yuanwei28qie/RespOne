@@ -24,7 +24,7 @@ import com.microsilver.mrcard.basicservice.service.SuperDeliveryOrderService;
  * @Copyright  Micro Silver-SuperDelivery
  *
  */
-@Api(value = "/api/SuperDeliveryOrderController", description = "骑手功能API")
+@Api(value = "/api/SuperDeliveryOrderController", description = "骑手订单相关功能API")
 @Controller
 @RequestMapping(value = "/api/SuperDeliveryOrderController")
 public class SuperDeliveryOrderController {
@@ -35,7 +35,7 @@ public class SuperDeliveryOrderController {
 	@RequestMapping("/isWork")
 	@ApiOperation(value = "休息/开工", httpMethod = "POST")
 	@ApiImplicitParams({ @ApiImplicitParam(name = "superDeliveryId", value = "用户id"),
-			@ApiImplicitParam(name = "isWork", value = "true.开工 false.休息") })
+			@ApiImplicitParam(name = "isWork", value = "1代表true.开工;0代表false.休息") })
 	public RespBaseDto<String> isWork(
 			Long superDeliveryId, 
 			Boolean isWork) {
@@ -51,4 +51,6 @@ public class SuperDeliveryOrderController {
 		}
 		return result;
 	}
+	
+	
 }

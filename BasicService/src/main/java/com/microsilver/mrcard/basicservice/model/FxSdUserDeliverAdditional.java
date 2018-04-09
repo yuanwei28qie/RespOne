@@ -3,6 +3,7 @@ package com.microsilver.mrcard.basicservice.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 @Data
 public class FxSdUserDeliverAdditional implements Serializable {
@@ -22,7 +23,7 @@ public class FxSdUserDeliverAdditional implements Serializable {
     private BigDecimal serviceScore;
 
     private Integer levelScore;
-
+    @ApiModelProperty(value="是否工作,(0代表false,休息; 1代表true,开工)")
     private Boolean isWork;
 
     private Integer totalMileage;

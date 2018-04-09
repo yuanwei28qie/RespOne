@@ -33,9 +33,19 @@ public class SupserDeliveryInfoService {
 		List<FxSdUserDeliverAdditional> list = fxSdUserDeliverAdditionalMapper.selectByExample(example);
 		if(list.size()>0) {
 			return list.get(0);
-			
 		}
 		return null;
 	}
+	
+	public List<FxSdUserDeliverAdditional> selectSuperDelivery() {
+		FxSdUserDeliverAdditionalExample example = new FxSdUserDeliverAdditionalExample();
+		List<FxSdUserDeliverAdditional> list = fxSdUserDeliverAdditionalMapper.selectByExample(example);
+		if(list.size()>0) {
+			return list;
+		}
+			return null;
+	}
+	
+	
 	
 }

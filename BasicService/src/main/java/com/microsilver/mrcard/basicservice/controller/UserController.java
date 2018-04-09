@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.microsilver.mrcard.basicservice.dto.RespBaseDto;
+import com.microsilver.mrcard.basicservice.model.FxSdCarriageOrder;
+import com.microsilver.mrcard.basicservice.model.FxSdSysCarriageDispatch;
 import com.microsilver.mrcard.basicservice.model.FxSdUserAddress;
+import com.microsilver.mrcard.basicservice.model.FxSdUserDeliverAdditional;
 import com.microsilver.mrcard.basicservice.model.FxSdUserMember;
 import com.microsilver.mrcard.basicservice.model.FxSdUserPreReg;
 import com.microsilver.mrcard.basicservice.model.enums.EWarning;
@@ -23,7 +26,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
+import com.microsilver.mrcard.basicservice.service.OrderService;
+import com.microsilver.mrcard.basicservice.service.SupserDeliveryInfoService;
+import com.microsilver.mrcard.basicservice.service.UserCarriageDispatchService;
 import com.microsilver.mrcard.basicservice.service.UserService;
+import com.microsilver.mrcard.basicservice.utils.ArrayRandom;
+import com.microsilver.mrcard.basicservice.utils.TwoPointToDistanceUtils;
 
 /**
  * 
@@ -44,6 +52,17 @@ public class UserController extends BaseController {
 	
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
+	
+	@Autowired
+	private SupserDeliveryInfoService supserDeliveryInfoService;
+	
+	@Autowired
+	private UserCarriageDispatchService userCarriageDispatchService;
+	
+	@Autowired
+	private OrderService orderService;
+	
+	
 	
 	@ApiOperation(value = "用户注册(手机号快速注册)", httpMethod = "POST")
 	@ApiImplicitParams({ 
@@ -263,39 +282,31 @@ public class UserController extends BaseController {
 	}
 	
 	@ApiOperation(value = "用户登陆(手机号,密码登陆)", httpMethod = "POST")
-	@ApiImplicitParams({ @ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "form"),
-			@ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "form") })
+	@ApiImplicitParams({ 
+			@ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "body"),
+			@ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "body") })
 	@RequestMapping(value = "/UserLogin")
 	@ResponseBody
-	public RespBaseDto<Object> UserLogin(String mobile, String password) {
+	public RespBaseDto<Object> UserLogin(
+			String mobile, 
+			String password
+			) {
 		RespBaseDto<Object> result = new RespBaseDto<Object>();
-		if (mobile == null || mobile.trim().equals("")) {
-			result.setState(1);
-			result.setMessage("你输入的电话号码为空,请重新输入");
-			return result;
+		try {
+			if(mobile!=null&&password!=null) {
+				FxSdUserMember selectUserByMobile = userService.selectUserByMobile(mobile);
+				if(selectUserByMobile!=null) {
+					if(selectUserByMobile.getPwd().equals(DigestUtils.md5Hex(password))) {
+						result.setMessage("ok");
+						result.setState(200);
+					}
+				}
+			}
+		}catch(Exception e) {
+			logger.error("UploadSuperDeliveryHeadImg error:{}",e.getMessage());
+			result.setMessage(EWarning.Unknown.getName()+e.getMessage());
+			result.setState(EWarning.Unknown.getValue());
 		}
-		if (password == null || password.trim().equals("")) {
-			result.setState(2);
-			result.setMessage("你输入的密码不能为空,请重新输入");
-			return result;
-		}
-		// 验证手机号是否存在
-		FxSdUserMember selectUserByMobile = userService.selectUserByMobile(mobile);
-		if (selectUserByMobile == null) {
-			result.setState(3);
-			result.setMessage("您输入的电话未注册,请先注册");
-			return result;
-		}
-		// 验证密码是否正确
-		String md5password = DigestUtils.md5Hex(password);
-		if (!selectUserByMobile.getPwd().equals(md5password)) {
-			result.setState(4);
-			result.setMessage("您输入的密码有误,请重新输出");
-			return result;
-		}
-		result.setState(200);
-		result.setMessage("恭喜你,登陆成功");
-
 		return result;
 	}
 	
@@ -344,15 +355,18 @@ public class UserController extends BaseController {
 					String redisCheckCode = stringRedisTemplate.opsForValue().get(oldPhoneNumber);
 					if(redisCheckCode!=null) {
 						if(Integer.parseInt(oldCheckCode)==Integer.parseInt(redisCheckCode)) {
-							String redisNewPhoneCheckCode = stringRedisTemplate.opsForValue().get(newPhoneNumber);
-							if(Integer.parseInt(redisNewPhoneCheckCode)==Integer.parseInt(newCheckCode)) {
-								//通过旧手机查询到记录并修改为修手机
-								selectUserByMobile.setMobile(newPhoneNumber);
-								selectUserByMobile.setNickname(newPhoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
-								userService.updatePhone(selectUserByMobile,oldPhoneNumber);
-								result.setData(selectUserByMobile);
-								result.setMessage("Ok");
-								result.setState(200);
+							FxSdUserMember selectUserByMobile2 = userService.selectUserByMobile(newPhoneNumber);
+							if(selectUserByMobile2==null) {
+								String redisNewPhoneCheckCode = stringRedisTemplate.opsForValue().get(newPhoneNumber);
+								if(Integer.parseInt(redisNewPhoneCheckCode)==Integer.parseInt(newCheckCode)) {
+									//通过旧手机查询到记录并修改为修手机
+									selectUserByMobile.setMobile(newPhoneNumber);
+									selectUserByMobile.setNickname(newPhoneNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
+									userService.updatePhone(selectUserByMobile,oldPhoneNumber);
+									result.setData(selectUserByMobile);
+									result.setMessage("Ok");
+									result.setState(200);
+								}
 							}
 						}
 					}
@@ -658,4 +672,92 @@ public class UserController extends BaseController {
 		}
 		return result;
 	}
+	
+	@ApiOperation(value = "用户首页获取周围骑手信息", httpMethod = "POST")
+	@ApiImplicitParams({ 
+		@ApiImplicitParam(name = "lat", value = "经度", required = true, paramType = "body"), 
+		@ApiImplicitParam(name = "lng", value = "纬度", required = true, paramType = "body"),
+		@ApiImplicitParam(name = "areaCode", value = "区域编号", required = true, paramType = "body") 
+		})
+	@RequestMapping(value = "/GetDeliversPosition")
+	@ResponseBody
+	public RespBaseDto<Map<String, String>> GetDeliversPosition(
+			String lat,
+			String lng,
+			String areaCode
+			){
+		RespBaseDto<Map<String, String>> result = new RespBaseDto<Map<String, String>>();
+		try {
+			//存放骑手的map
+			Map<String, String> map = new HashMap<String,String>();
+			//查询出fx_sd_user_deliver_additional所有的经度纬度
+			List<FxSdUserDeliverAdditional> listSuperDelivery = supserDeliveryInfoService.selectSuperDelivery();
+			if(listSuperDelivery!=null) {
+				for (FxSdUserDeliverAdditional fxSdUserDeliverAdditional : listSuperDelivery) {
+					System.out.println(fxSdUserDeliverAdditional.toString());
+					//骑手于用户之间的距离
+					double distance = TwoPointToDistanceUtils.getDistance(Double.parseDouble(lat), Double.parseDouble(lng), 
+							Double.parseDouble(fxSdUserDeliverAdditional.getLat()), Double.parseDouble(fxSdUserDeliverAdditional.getLng()));
+					//通过区域编号查询到该区域编号的默认公里数;
+					 FxSdSysCarriageDispatch selectDispatchByAreaId = userCarriageDispatchService.selectDispatchByAreaId(areaCode);
+					 Byte baseMileage =selectDispatchByAreaId.getBaseMileage();
+					double doubleValue = baseMileage.doubleValue()*1000;
+					
+					System.out.println("distance: "+distance);
+					System.out.println("doubleValue:"+doubleValue);
+					
+					
+					Double doubleDistance = new Double(distance);
+					Double doubleDoubleValue = new Double(doubleValue);
+					int compareTo = doubleDistance.compareTo(doubleDoubleValue);
+					if(compareTo > 0) {
+						
+					}else if(compareTo < 0) {
+						System.out.println("------------");
+						//骑手工作时
+						System.out.println("fxSdUserDeliverAdditional.getIsWork():"+fxSdUserDeliverAdditional.getIsWork());
+						if(!fxSdUserDeliverAdditional.getIsWork()) {
+							System.out.println("111111111111111");
+							//骑手未接单
+							//通过用骑手的id去查询订单表中订单的状态为<6;
+							Byte orderStatus = orderService.selectOrderByDeliveryId(fxSdUserDeliverAdditional.getDeliverId());
+							System.out.println("orderStatus"+orderStatus);
+							if(orderStatus<6) {
+								map.put(fxSdUserDeliverAdditional.getLat(), fxSdUserDeliverAdditional.getLng());
+								result.setData(map);
+								result.setMessage("骑手数据经纬度已返回");
+								result.setState(200);
+							}
+						}
+					}else {
+						result.setMessage("起点终点是一致的");
+					}
+				}
+				//骑手少于十个,则假数据十个;
+				double lngDouble = Double.parseDouble(lng);
+				double latDouble = Double.parseDouble(lat);
+				if(map.size()<10) {
+					double[] random = ArrayRandom.random(10, 20);
+					for (double i : random) {
+						map.put(String.valueOf(latDouble+i), String.valueOf(lngDouble+i));
+						result.setData(map);
+						result.setMessage("骑手数据经纬度已返回");
+						result.setState(200);
+					}
+				}
+			}
+			for (String key : map.keySet()) {
+				System.out.println("key:"+key+"  value:"+map.get(key));
+			}
+		}catch(Exception e) {
+			logger.error("GetDeliversPosition error:{}",e.getMessage());
+			result.setMessage(EWarning.Unknown.getName()+e.getMessage());
+			result.setState(EWarning.Unknown.getValue());
+		}
+		return result;
+		
+		
+	}
+	
+	
 }

@@ -442,4 +442,39 @@ public class SuperDeliveryController extends BaseController {
 		}
 		return result;
 	}
+	/**
+	 * 骑手头像上传
+	 */
+	@ApiOperation(value = "骑手头像上传", httpMethod = "POST")
+	@ApiImplicitParams({ 
+		@ApiImplicitParam(name = "superDeliveryId", value = "骑手Id", required = true, paramType = "body") ,
+		@ApiImplicitParam(name = "avatar", value = "骑手头像URL", required = true, paramType = "body") 
+			})
+	@RequestMapping(value = "/UploadSuperDeliveryHeadImg")
+	@ResponseBody
+	public RespBaseDto<Object> UploadSuperDeliveryHeadImg(
+			String superDeliveryId,
+			String avatar 
+			) {
+		RespBaseDto<Object> result = new RespBaseDto<Object>();
+		try {
+			if(superDeliveryId!=null) {
+				 FxSdUserDeliverinfo superDelivery = superDeliveryService.selectUserBysuperDeliveryId(superDeliveryId);
+				if(avatar!=null&&superDelivery!=null) {
+					superDelivery.setAvatar(avatar);
+					superDeliveryService.updateAvatar(superDelivery);
+					result.setData(superDelivery);
+					result.setMessage("ok");
+					result.setState(200);
+				}
+			}
+			
+		}catch(Exception e) {
+			logger.error("UploadSuperDeliveryHeadImg error:{}",e.getMessage());
+			result.setMessage(EWarning.Unknown.getName()+e.getMessage());
+			result.setState(EWarning.Unknown.getValue());
+		}
+		return result;
+	}
+	
 }
