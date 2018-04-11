@@ -3,6 +3,9 @@ package com.microsilver.mrcard.basicservice.dao;
 import com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomer;
 import com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomerExample;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 
 public interface FxSdFinanceCustomerMapper {
@@ -27,4 +30,5 @@ public interface FxSdFinanceCustomerMapper {
     int updateByPrimaryKeySelective(FxSdFinanceCustomer record);
 
     int updateByPrimaryKey(FxSdFinanceCustomer record);
+   
 }

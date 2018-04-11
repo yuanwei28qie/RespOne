@@ -3,6 +3,8 @@
 <mapper namespace="com.microsilver.mrcard.basicservice.dao.FxSdFinanceCustomerMapper" >
   <resultMap id="BaseResultMap" type="com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomer" >
     <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="userID" property="userid" jdbcType="BIGINT" />
+    <result column="usertype" property="usertype" jdbcType="TINYINT" />
     <result column="total_amount" property="totalAmount" jdbcType="DECIMAL" />
     <result column="real_amount" property="realAmount" jdbcType="DECIMAL" />
     <result column="other_amount" property="otherAmount" jdbcType="DECIMAL" />
@@ -69,7 +71,8 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    id, total_amount, real_amount, other_amount, advance_amount, creat_time, status
+    id, userID, usertype, total_amount, real_amount, other_amount, advance_amount, creat_time, 
+    status
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomerExample" >
     select
@@ -102,18 +105,26 @@
     </if>
   </delete>
   <insert id="insert" parameterType="com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomer" >
-    insert into fx_sd_finance_customer (id, total_amount, real_amount, 
-      other_amount, advance_amount, creat_time, 
-      status)
-    values (#{id,jdbcType=BIGINT}, #{totalAmount,jdbcType=DECIMAL}, #{realAmount,jdbcType=DECIMAL}, 
-      #{otherAmount,jdbcType=DECIMAL}, #{advanceAmount,jdbcType=DECIMAL}, #{creatTime,jdbcType=INTEGER}, 
-      #{status,jdbcType=TINYINT})
+    insert into fx_sd_finance_customer (id, userID, usertype, 
+      total_amount, real_amount, other_amount, 
+      advance_amount, creat_time, status
+      )
+    values (#{id,jdbcType=BIGINT}, #{userid,jdbcType=BIGINT}, #{usertype,jdbcType=TINYINT}, 
+      #{totalAmount,jdbcType=DECIMAL}, #{realAmount,jdbcType=DECIMAL}, #{otherAmount,jdbcType=DECIMAL}, 
+      #{advanceAmount,jdbcType=DECIMAL}, #{creatTime,jdbcType=INTEGER}, #{status,jdbcType=TINYINT}
+      )
   </insert>
   <insert id="insertSelective" parameterType="com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomer" >
     insert into fx_sd_finance_customer
     <trim prefix="(" suffix=")" suffixOverrides="," >
       <if test="id != null" >
         id,
+      </if>
+      <if test="userid != null" >
+        userID,
+      </if>
+      <if test="usertype != null" >
+        usertype,
       </if>
       <if test="totalAmount != null" >
         total_amount,
@@ -137,6 +148,12 @@
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
         #{id,jdbcType=BIGINT},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=BIGINT},
+      </if>
+      <if test="usertype != null" >
+        #{usertype,jdbcType=TINYINT},
       </if>
       <if test="totalAmount != null" >
         #{totalAmount,jdbcType=DECIMAL},
@@ -170,6 +187,12 @@
       <if test="record.id != null" >
         id = #{record.id,jdbcType=BIGINT},
       </if>
+      <if test="record.userid != null" >
+        userID = #{record.userid,jdbcType=BIGINT},
+      </if>
+      <if test="record.usertype != null" >
+        usertype = #{record.usertype,jdbcType=TINYINT},
+      </if>
       <if test="record.totalAmount != null" >
         total_amount = #{record.totalAmount,jdbcType=DECIMAL},
       </if>
@@ -196,6 +219,8 @@
   <update id="updateByExample" parameterType="map" >
     update fx_sd_finance_customer
     set id = #{record.id,jdbcType=BIGINT},
+      userID = #{record.userid,jdbcType=BIGINT},
+      usertype = #{record.usertype,jdbcType=TINYINT},
       total_amount = #{record.totalAmount,jdbcType=DECIMAL},
       real_amount = #{record.realAmount,jdbcType=DECIMAL},
       other_amount = #{record.otherAmount,jdbcType=DECIMAL},
@@ -209,6 +234,12 @@
   <update id="updateByPrimaryKeySelective" parameterType="com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomer" >
     update fx_sd_finance_customer
     <set >
+      <if test="userid != null" >
+        userID = #{userid,jdbcType=BIGINT},
+      </if>
+      <if test="usertype != null" >
+        usertype = #{usertype,jdbcType=TINYINT},
+      </if>
       <if test="totalAmount != null" >
         total_amount = #{totalAmount,jdbcType=DECIMAL},
       </if>
@@ -232,7 +263,9 @@
   </update>
   <update id="updateByPrimaryKey" parameterType="com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomer" >
     update fx_sd_finance_customer
-    set total_amount = #{totalAmount,jdbcType=DECIMAL},
+    set userID = #{userid,jdbcType=BIGINT},
+      usertype = #{usertype,jdbcType=TINYINT},
+      total_amount = #{totalAmount,jdbcType=DECIMAL},
       real_amount = #{realAmount,jdbcType=DECIMAL},
       other_amount = #{otherAmount,jdbcType=DECIMAL},
       advance_amount = #{advanceAmount,jdbcType=DECIMAL},

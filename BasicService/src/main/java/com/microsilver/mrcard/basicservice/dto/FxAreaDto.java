@@ -21,5 +21,4 @@ public class FxAreaDto {
 	private String province;
 	private String city;
 	private String county;
-
 }

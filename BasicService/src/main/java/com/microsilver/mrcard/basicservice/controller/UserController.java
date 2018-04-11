@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.microsilver.mrcard.basicservice.dto.RespBaseDto;
-import com.microsilver.mrcard.basicservice.model.FxSdCarriageOrder;
+import com.microsilver.mrcard.basicservice.model.FxSdFinanceCustomer;
 import com.microsilver.mrcard.basicservice.model.FxSdSysCarriageDispatch;
 import com.microsilver.mrcard.basicservice.model.FxSdUserAddress;
 import com.microsilver.mrcard.basicservice.model.FxSdUserDeliverAdditional;
@@ -31,7 +31,7 @@ import com.microsilver.mrcard.basicservice.service.SupserDeliveryInfoService;
 import com.microsilver.mrcard.basicservice.service.UserCarriageDispatchService;
 import com.microsilver.mrcard.basicservice.service.UserService;
 import com.microsilver.mrcard.basicservice.utils.ArrayRandom;
-import com.microsilver.mrcard.basicservice.utils.TwoPointToDistanceUtils;
+import com.microsilver.mrcard.basicservice.utils.MapDistance;
 
 /**
  * 
@@ -64,64 +64,13 @@ public class UserController extends BaseController {
 	
 	
 	
-	@ApiOperation(value = "用户注册(手机号快速注册)", httpMethod = "POST")
-	@ApiImplicitParams({ 
-		@ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "body"),
-		@ApiImplicitParam(name = "checkCode", value = "验证码", required = true, paramType = "body")})
-	@RequestMapping(value = "/quickRegister")
-	@ResponseBody
-	public RespBaseDto<Object> UserQuickRegister(
-			String mobile,
-			String checkCode){
-		 RespBaseDto<Object> result = new RespBaseDto<Object>();
-		 if(mobile==null||mobile.trim().equals("")) {
-			 result.setMessage("您的手机号为空,请重新输入");
-			 result.setState(1);
-			 return result;
-		 }
-		 if(checkCode==null||checkCode.trim().equals("")) {
-			 result.setMessage("您的验证码为空,请重新输入");
-			 result.setState(2);
-			 return result;
-		 }
-		 FxSdUserMember selectUserByMobile = userService.selectUserByMobile(mobile);
-		 if(selectUserByMobile!=null) {
-			 result.setMessage("您的手机号已注册,请重新选择");
-			 result.setState(3);
-			 return result;
-		 }
-		String redisCheckCode = stringRedisTemplate.opsForValue().get(mobile);
-		System.out.println(redisCheckCode);
-		if (redisCheckCode == null || redisCheckCode.trim().equals("")) {
-			result.setMessage("验证码未获取,请联系管理员");
-			result.setState(4);
-			return result;
-		}
-		int valueOf = Integer.valueOf(redisCheckCode);
-		int valueOf2 = Integer.valueOf(checkCode);
-		if (valueOf != valueOf2) {
-			result.setMessage("验证码有误,请联系管理员");
-			result.setState(5);
-			return result;
-		}
-		 
-		 //创建一个用户对象
-		 FxSdUserMember fxSdUserMember = new FxSdUserMember();
-		 fxSdUserMember.setMobile(mobile);
-		 fxSdUserMember.setCreatetime((int) new Date().getTime());
-		 //默认信用等级分80
-		 fxSdUserMember.setServicescor(80);
-		 //添加到数据库
-		 userService.insertUser(fxSdUserMember);
-		 result.setMessage("用户添加成功");
-		 result.setState(200);
-		 return result;
-	}
+	
 	
 	@ApiOperation(value = "用户注册(手机号密码注册)", httpMethod = "POST")
 	@ApiImplicitParams({ 
 		@ApiImplicitParam(name = "mobile", value = "手机号", required = true, paramType = "body"),
-		@ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "body")})
+		@ApiImplicitParam(name = "password", value = "密码", required = true, paramType = "body"),
+		@ApiImplicitParam(name = "checkCode", value = "验证码", required = true, paramType = "body")})
 	@RequestMapping(value = "/UserRegister")
 	@ResponseBody
 	public RespBaseDto<Object> UserRegister(
@@ -297,6 +246,7 @@ public class UserController extends BaseController {
 				FxSdUserMember selectUserByMobile = userService.selectUserByMobile(mobile);
 				if(selectUserByMobile!=null) {
 					if(selectUserByMobile.getPwd().equals(DigestUtils.md5Hex(password))) {
+						result.setData(selectUserByMobile);
 						result.setMessage("ok");
 						result.setState(200);
 					}
@@ -307,6 +257,7 @@ public class UserController extends BaseController {
 			result.setMessage(EWarning.Unknown.getName()+e.getMessage());
 			result.setState(EWarning.Unknown.getValue());
 		}
+		
 		return result;
 	}
 	
@@ -323,7 +274,7 @@ public class UserController extends BaseController {
 				if(selectUserByMobile!=null) {
 					result.setData(selectUserByMobile);
 					result.setMessage("Ok");
-					result.setData(200);
+					result.setState(200);
 				}
 			}
 		}catch(Exception e) {
@@ -390,9 +341,9 @@ public class UserController extends BaseController {
 		@ApiImplicitParam(name = "area", value = "县/区", required = true, paramType = "body") ,
 		@ApiImplicitParam(name = "street", value = "街道", required = true, paramType = "body"),
 		@ApiImplicitParam(name = "address", value = "详细地址", required = true, paramType = "body"),
-		@ApiImplicitParam(name = "lat", value = "经度", required = true, paramType = "body"),
-		@ApiImplicitParam(name = "lng", value = "纬度", required = true, paramType = "body") ,
-		//@ApiImplicitParam(name = "isdefault", value = "是否默认地址(0 非默认地址 1 默认地址)", required = true, paramType = "body"),
+		@ApiImplicitParam(name = "lat", value = "纬度", required = true, paramType = "body"),
+		@ApiImplicitParam(name = "lng", value = "经度", required = true, paramType = "body") ,
+		@ApiImplicitParam(name = "isdefault", value = "是否默认地址(0 非默认地址 1 默认地址)", required = true, paramType = "body"),
 		@ApiImplicitParam(name = "memeberId", value = "用户Id", required = true, paramType = "body")})
 	@RequestMapping(value = "/AddUserAdress")
 	@ResponseBody
@@ -406,7 +357,7 @@ public class UserController extends BaseController {
 			String address,
 			String lat,
 			String lng,
-			//String isdefault,
+			String isdefault,
 			String memeberId){
 		RespBaseDto<Object> result = new RespBaseDto<Object>();
 		try {
@@ -414,6 +365,7 @@ public class UserController extends BaseController {
 			if(mobile!=null&&realname!=null&&province!=null&&city!=null&&area!=null&&street!=null
 					&&address!=null&&lat!=null&&lng!=null&&memeberId!=null) {
 				FxSdUserMember selectUserByMobile = userService.selectUserByUserId(memeberId);
+				System.out.println(selectUserByMobile.toString());
 				if(selectUserByMobile!=null) {
 					//判断该用户是否只有一条常用地址,如果是,则设置这条地址为默认地址;
 					fxSdUserAddress.setAddress(address);
@@ -427,13 +379,54 @@ public class UserController extends BaseController {
 					fxSdUserAddress.setRealname(realname);
 					fxSdUserAddress.setStreet(street);
 					System.out.println(selectUserByMobile.toString());
-					int count = userService.selectUserAddressByUserId(selectUserByMobile.getId());
-					if(count<1) {
-						fxSdUserAddress.setIsdefault((byte)1);
+					//判断是否是默认地址
+					if(isdefault.equals("1")) {
+						//查询所有订单
+						List<FxSdUserAddress> listAddress = userService.selectUserAllAddress(memeberId);
+						System.out.println(listAddress.toString());
+						if(listAddress!=null) {
+							for (FxSdUserAddress addressDefault : listAddress) {
+								Byte isdefault2 = addressDefault.getIsdefault();
+								//找到默认值为1的地址修改为0
+								if(isdefault2==1) {
+									addressDefault.setIsdefault((byte)0);
+									userService.updateAddress(addressDefault, addressDefault.getId().toString());
+								}
+							}
+						}
+							System.out.println("11111111");
+							//写入数据库
+							fxSdUserAddress.setIsdefault((byte)1);
+							userService.insertAddress(fxSdUserAddress);
+						
 					}else {
-						fxSdUserAddress.setIsdefault((byte)0);
+						//查询数据库中是否有默认地址
+						//查询所有订单
+						List<FxSdUserAddress> listAddress = userService.selectUserAllAddress(memeberId);
+						
+						//System.out.println(listAddress.toString());
+						if(listAddress!=null) {
+							for (FxSdUserAddress addressDefault : listAddress) {
+								Byte isdefault2 = addressDefault.getIsdefault();
+								//找到默认值为1的地址修改为0
+								if(isdefault2==1) {
+									//写入数据库
+									fxSdUserAddress.setIsdefault((byte)0);
+									userService.insertAddress(fxSdUserAddress);
+								}else {
+									//没有默认地址则设置第一条数据为默认地址
+									FxSdUserAddress fxSdUserAddress2 = listAddress.get(0);
+									fxSdUserAddress2.setIsdefault((byte)1);
+									userService.updateAddress(fxSdUserAddress2, fxSdUserAddress2.getId().toString());
+								}
+							}
+						}else {
+							
+							fxSdUserAddress.setIsdefault((byte)1);
+							userService.insertAddress(fxSdUserAddress);
+						}
+						
 					}
-					userService.insertAddress(fxSdUserAddress);
 					result.setData(fxSdUserAddress);
 					result.setMessage("Ok");
 					result.setState(200);
@@ -459,7 +452,8 @@ public class UserController extends BaseController {
 		@ApiImplicitParam(name = "lat", value = "经度", required = true, paramType = "body"),
 		@ApiImplicitParam(name = "lng", value = "纬度", required = true, paramType = "body") ,
 		@ApiImplicitParam(name = "addressId", value = "用户地址id", required = true, paramType = "body"),
-		@ApiImplicitParam(name = "memeberId", value = "用户Id", required = true, paramType = "body")})
+		@ApiImplicitParam(name = "memeberId", value = "用户Id", required = true, paramType = "body"),
+		@ApiImplicitParam(name = "isdefault", value = "是否默认地址", required = true, paramType = "body")})
 	@RequestMapping(value = "/UpdateUserAdress")
 	@ResponseBody
 	public RespBaseDto<Object> UpdateUserAdress(
@@ -473,6 +467,7 @@ public class UserController extends BaseController {
 			String lat,
 			String lng,
 			String addressId,
+			String isdefault,
 			String memeberId){
 		RespBaseDto<Object> result = new RespBaseDto<Object>();
 		try {
@@ -490,13 +485,47 @@ public class UserController extends BaseController {
 				fxSdUserAddress.setMemberId(Long.parseLong(memeberId));
 				fxSdUserAddress.setStreet(street);
 				fxSdUserAddress.setId(Integer.valueOf(addressId));
-				int count = userService.selectUserAddressByUserId(Long.parseLong(memeberId));
-				if(count<1) {
+				//判断是否用户地址是默认地址
+				if(isdefault.equals("1")) {
+					//查询所有订单
+					List<FxSdUserAddress> listAddress = userService.selectUserAllAddress(memeberId);
+					if(listAddress!=null) {
+						for (FxSdUserAddress addressDefault : listAddress) {
+							Byte isdefault2 = addressDefault.getIsdefault();
+							//找到默认值为1的地址修改为0
+							if(isdefault2==1) {
+								addressDefault.setIsdefault((byte)0);
+								userService.updateAddress(addressDefault, addressDefault.getId().toString());
+							}
+						}
+					}
+					//写入数据库
 					fxSdUserAddress.setIsdefault((byte)1);
+					userService.updateAddress(fxSdUserAddress, addressId);
 				}else {
-					fxSdUserAddress.setIsdefault((byte)0);
+					//查询数据库中是否有默认地址
+					//查询所有订单
+					List<FxSdUserAddress> listAddress = userService.selectUserAllAddress(memeberId);
+					
+					System.out.println(listAddress.toString());
+					if(listAddress!=null) {
+						for (FxSdUserAddress addressDefault : listAddress) {
+							Byte isdefault2 = addressDefault.getIsdefault();
+							//找到默认值为1的地址修改为0
+							if(isdefault2==1) {
+								//写入数据库
+								fxSdUserAddress.setIsdefault((byte)0);
+								userService.updateAddress(fxSdUserAddress, addressId);
+							}else {
+								//没有默认地址则设置第一条数据为默认地址
+								FxSdUserAddress fxSdUserAddress2 = listAddress.get(0);
+								fxSdUserAddress2.setIsdefault((byte)1);
+								userService.updateAddress(fxSdUserAddress2, fxSdUserAddress2.getId().toString());
+							}
+						}
+					}
 				}
-				userService.updateAddress(fxSdUserAddress,addressId);
+				
 				result.setData(fxSdUserAddress);
 				result.setMessage("Ok");
 				result.setState(200);
@@ -534,6 +563,8 @@ public class UserController extends BaseController {
 			}
 			
 			if(map.containsValue((byte)1)) {
+				result.setMessage("OK");
+				result.setState(200);
 			}else{
 				FxSdUserAddress fxSdUserAddress = list.get(0);
 				fxSdUserAddress.setIsdefault((byte)1);
@@ -696,8 +727,9 @@ public class UserController extends BaseController {
 				for (FxSdUserDeliverAdditional fxSdUserDeliverAdditional : listSuperDelivery) {
 					System.out.println(fxSdUserDeliverAdditional.toString());
 					//骑手于用户之间的距离
-					double distance = TwoPointToDistanceUtils.getDistance(Double.parseDouble(lat), Double.parseDouble(lng), 
-							Double.parseDouble(fxSdUserDeliverAdditional.getLat()), Double.parseDouble(fxSdUserDeliverAdditional.getLng()));
+					
+					double distance = Double.valueOf(MapDistance.getDistance(lat,lng, 
+							fxSdUserDeliverAdditional.getLat(), fxSdUserDeliverAdditional.getLng()))*1000;
 					//通过区域编号查询到该区域编号的默认公里数;
 					 FxSdSysCarriageDispatch selectDispatchByAreaId = userCarriageDispatchService.selectDispatchByAreaId(areaCode);
 					 Byte baseMileage =selectDispatchByAreaId.getBaseMileage();

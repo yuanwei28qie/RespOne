@@ -81,8 +81,7 @@ public class CommonController extends BaseController {
 			if (mobile != null && !mobile.equals("")) {
 				mobile = mobile.trim();
 				// 生成验证码
-				int radomInt = new Random().nextInt(999999);
-				String checkCode = String.valueOf(radomInt);
+				String checkCode = (Math.random()+"").substring(2, 8);
 				// 存入redis中
 				stringRedisTemplate.opsForValue().set(mobile, checkCode);
 				//发送消息给MQ
@@ -97,8 +96,6 @@ public class CommonController extends BaseController {
 			result.setMessage(EWarning.Unknown.getName()+e.getMessage());
 			result.setState(EWarning.Unknown.getValue());
 		}
-		
-
 		return result;
 	}
 	@ApiOperation(value = "MQ接收处理，短信消息，推送消息", httpMethod = "POST")

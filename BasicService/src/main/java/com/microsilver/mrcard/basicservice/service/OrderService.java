@@ -8,7 +8,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.github.pagehelper.PageHelper;
 import com.microsilver.mrcard.basicservice.dao.FxSdCarriageOrderMapper;
+import com.microsilver.mrcard.basicservice.dto.PageBeanDto;
 import com.microsilver.mrcard.basicservice.model.FxSdCarriageOrder;
 import com.microsilver.mrcard.basicservice.model.FxSdCarriageOrderExample;
 
@@ -73,6 +75,21 @@ public class OrderService {
 		}
 		return null;
 		
+		
+	}
+
+	public List<FxSdCarriageOrder> selectOrderByPage(FxSdCarriageOrder fxSdCarriageOrder,Integer currentPage, Integer pageSize) {
+		PageHelper.startPage(currentPage, pageSize);
+		FxSdCarriageOrderExample example = new	FxSdCarriageOrderExample();
+		example.createCriteria().andMemberIdEqualTo(fxSdCarriageOrder.getMemberId()).
+		andStatusEqualTo(fxSdCarriageOrder.getStatus()).andOrdersnEqualTo(fxSdCarriageOrder.getOrdersn());
+		//所有记录
+		List<FxSdCarriageOrder> orderAll = fxSdCarriageOrderMapper.selectByExample(example);
+		//总记录数
+		Integer count = fxSdCarriageOrderMapper.countByExample(example);
+		PageBeanDto<FxSdCarriageOrder> pageData = new PageBeanDto<FxSdCarriageOrder>(currentPage, pageSize, count);
+		pageData.setItems(orderAll);
+		return pageData.getItems();
 		
 	}
 

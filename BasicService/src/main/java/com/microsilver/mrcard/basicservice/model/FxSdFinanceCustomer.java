@@ -1,17 +1,15 @@
 package com.microsilver.mrcard.basicservice.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import lombok.Data;
 @Data
-public class FxSdFinanceCustomer  implements Serializable{
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class FxSdFinanceCustomer {
+    private Long id;
 
-	private Long id;
+    private Long userid;
+
+    private Byte usertype;
 
     private BigDecimal totalAmount;
 
@@ -25,5 +23,5 @@ public class FxSdFinanceCustomer  implements Serializable{
 
     private Byte status;
 
-   
+    
 }
